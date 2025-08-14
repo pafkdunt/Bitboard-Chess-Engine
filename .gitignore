@@ -1,0 +1,7 @@
+bbc
+bbc.exe
+*.dSYM/
+*.o
+*.obj
+*~
+*.tmp

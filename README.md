@@ -1,1 +1,1 @@
-# Bitboard-Chess-Engine
+# Bitboard Chess Engine

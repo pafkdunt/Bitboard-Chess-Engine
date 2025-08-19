@@ -16,6 +16,9 @@ enum {
     a1, b1, c1, d1, e1, f1, g1, h1
 };
 
+// sides to move
+enum { white, black };
+
 /*
 "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
@@ -70,6 +73,132 @@ void print_bitboard(U64 bitboard)
 
 }
 
+/*************\
+    ATTACK
+\*************/
+
+/*
+        not A file
+
+    8  0 1 1 1 1 1 1 1
+    7  0 1 1 1 1 1 1 1
+    6  0 1 1 1 1 1 1 1
+    5  0 1 1 1 1 1 1 1
+    4  0 1 1 1 1 1 1 1
+    3  0 1 1 1 1 1 1 1
+    2  0 1 1 1 1 1 1 1
+    1  0 1 1 1 1 1 1 1
+
+       a b c d e f g h
+
+
+        not H file
+
+    8  1 1 1 1 1 1 1 0
+    7  1 1 1 1 1 1 1 0
+    6  1 1 1 1 1 1 1 0
+    5  1 1 1 1 1 1 1 0
+    4  1 1 1 1 1 1 1 0
+    3  1 1 1 1 1 1 1 0
+    2  1 1 1 1 1 1 1 0
+    1  1 1 1 1 1 1 1 0
+
+       a b c d e f g h
+
+
+        not HG file
+
+    8  1 1 1 1 1 1 0 0
+    7  1 1 1 1 1 1 0 0
+    6  1 1 1 1 1 1 0 0
+    5  1 1 1 1 1 1 0 0
+    4  1 1 1 1 1 1 0 0
+    3  1 1 1 1 1 1 0 0
+    2  1 1 1 1 1 1 0 0
+    1  1 1 1 1 1 1 0 0
+
+       a b c d e f g h
+
+
+        not AB file
+
+    8  0 0 1 1 1 1 1 1
+    7  0 0 1 1 1 1 1 1
+    6  0 0 1 1 1 1 1 1
+    5  0 0 1 1 1 1 1 1
+    4  0 0 1 1 1 1 1 1
+    3  0 0 1 1 1 1 1 1
+    2  0 0 1 1 1 1 1 1
+    1  0 0 1 1 1 1 1 1
+
+       a b c d e f g h
+*/
+
+// not A file constant
+const U64 not_a_file = 18374403900871474942ULL;
+
+// not H file constant
+const U64 not_h_file = 9187201950435737471ULL;
+
+// not HG file constant
+const U64 not_hg_file = 4557430888798830399ULL;
+
+// not ABfile constant
+const U64 not_ab_file = 18229723555195321596ULL;
+
+// pawn attacks table [side][square]
+U64 pawn_attakcs[2][64];
+
+// knight attacks table [square]
+U64 knight_attakcs[64];
+
+// generate pawn attacks
+U64 mask_pawn_attakcs(int side, int square)
+{
+    // result attacks bitboard
+    U64 attacks = 0ULL;
+
+    // piece bit board
+    U64 bitboard = 0ULL;
+
+    // set piece on board
+    set_bit(bitboard, square);
+
+    // white pawns
+    if(!side)
+    {
+        if((bitboard >> 7) & not_a_file) attacks |= (bitboard >> 7);
+        if((bitboard >> 9) & not_h_file) attacks |= (bitboard >> 9);
+    }
+
+    // black pawns
+    else
+    {
+        if((bitboard << 7) & not_h_file) attacks |= (bitboard << 7);
+        if((bitboard << 9) & not_a_file) attacks |= (bitboard << 9);
+    }
+
+    // return attack map
+    return attacks;
+}
+
+U64 mask_knight_attakcs(int square)
+{
+
+}
+
+// init leaper pieces attacks
+void init_leaper_attakcs()
+{
+    // loop over 64 board squares
+    for (int square = 0; square < 64; square ++)
+    {
+        // init pawn attacks
+        pawn_attakcs[white][square] = mask_pawn_attakcs(white, square);
+        pawn_attakcs[black][square] = mask_pawn_attakcs(black, square);
+    }
+
+}
 
 /*************\
   MAIN DRIVER
@@ -77,20 +206,11 @@ void print_bitboard(U64 bitboard)
 
 int main()
 {
-    // defining bitboard
-    U64 bitboard = 0ULL;
+    // init leaper pieces attacks
+    init_leaper_attakcs();
 
-    set_bit(bitboard, e4);
-    set_bit(bitboard, c3);
-    set_bit(bitboard, f2);
 
-    print_bitboard(bitboard);
-
-    pop_bit(bitboard, e4);
-
-    pop_bit(bitboard, e4);
-
-    print_bitboard(bitboard);
+    print_bitboard(mask_pawn_attakcs(h5, black));
 
     return 0;
 }
